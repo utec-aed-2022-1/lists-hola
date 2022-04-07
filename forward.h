@@ -2,13 +2,13 @@
 #define FORWARD_H
 #include <iostream>
 #include "list.h"
-
+// FALTA REVERSE REMOVE
 // TODO: Implement all methods
 template <typename T>
 class ForwardList : public List<T> {
     private:
         Node<T>* head;
-        int nodes;
+        int nodes = 0;
 
     public:
         ForwardList() : List<T>() {}
@@ -18,11 +18,15 @@ class ForwardList : public List<T> {
         }
 
         T front(){
-            throw ("sin definir");
+            return this->head->data;
         }
 
         T back(){
-            throw ("sin definir");
+            Node<T>* tempNode = this->head;
+            while(tempNode->next != nullptr){
+                tempNode = tempNode->next; 
+            }
+            return tempNode->data; 
         }
 
         void push_front(T data){
@@ -34,7 +38,6 @@ class ForwardList : public List<T> {
                 this->head = newNode; 
             }
             this->nodes = this->nodes + 1; 
-            //std::cout << this->head->data  << std::endl;
         }
 
         void push_back(T data){
@@ -131,7 +134,22 @@ class ForwardList : public List<T> {
         }
 
         void clear(){
-            throw ("sin definir");
+            Node<T>* tempNode = this->head;
+            while(this->head != nullptr){
+                if(this->head->next != nullptr){
+                    tempNode = this->head->next; 
+                }
+                if(this->head->next != nullptr){
+                    this->head->killSelf(); 
+                    this->head = tempNode; 
+                    if(this->head->next == nullptr){
+                        this->head->killSelf(); 
+                        this->head = nullptr; 
+                    }
+                }
+                this->nodes--;
+            }
+            this->nodes--;
         }
         
         void sort(){
@@ -141,18 +159,13 @@ class ForwardList : public List<T> {
             Node<T>* prevOrg = this->head; 
             Node<T>* nextOrg = this->head; 
             Node<T>* actComp = this->head; 
-            int ma = 0; 
-            int key = 0; 
-
             
             for(int i = 0; i < this->size(); i++){
                 Node<T>* tempNode2 = this->head; 
-                ma = 0; 
                 for(int k = 0; k < i; k++){
                     tempNode2 = tempNode2->next; 
-                    ma++; 
                 }
-                for(int j = i; j < this->size(); j++){
+                for(int j = i; j < this->size() - 1; j++){
                     if(j == this->size()-1){ 
                         actComp = tempNode2;
                     } 
@@ -163,7 +176,6 @@ class ForwardList : public List<T> {
                             actComp = tempNode2->next;
                         }
                     }
-                    //std::cout<< "X: " << i << "       " << j << "        " << ma << "       " << actComp->data << "      " << tempNode1->data << std::endl;
                     if(actComp->data < tempNode1->data){
                         if(j == this->size()-1){nextComp = nullptr;}
                         else { 
@@ -178,24 +190,26 @@ class ForwardList : public List<T> {
                         if(nextComp == nullptr){
                             if(tempNode1->next == actComp){
                                 prevOrg->next = actComp;
-                                actComp->next = nextOrg;
-                                nextOrg->next = nullptr;
+                                actComp->next = tempNode1;
+                                tempNode1->next = nullptr;
                             } else {
                                 if(tempNode2->next==nullptr){
                                     prevOrg->next = actComp;
                                     actComp->next = nextOrg;
                                     nextOrg->next = tempNode1;
+                                    tempNode1->next = nullptr; 
                                 } else {
                                     prevOrg->next = actComp; //10 apunta a 12  ---------- 8 apunta a 10
                                     actComp->next = nextOrg; //12 apunta a 30  ---------- 10 apunta a 30
                                     prevComp->next = tempNode1; //30 apunta a 20 -------- 20 apunta a 12
                                     tempNode1->next = nullptr; // 20 no apunta a nadie -- 12 apunta a nadie
                                 }
-                                //std::cout<<std::endl<< "DATOS2: " << prevOrg->data <<  "  " <<actComp->data << "    " << tempNode1->data << "  " << prevComp->data <<  "  " << nextOrg->data << std::endl;
                             }
                         } else {
                             if(tempNode1->next == actComp){
-                                prevOrg->next = actComp; // 10 apunta a 20 
+                                if(actComp->next == nullptr){
+                                }
+                                prevOrg->next = actComp; // 12 apunta a 20 
                                 actComp->next  = tempNode1; // 20 apunta a 30  
                                 tempNode1->next = nextComp; // 30 apunta a 12
                             } else {
@@ -205,7 +219,6 @@ class ForwardList : public List<T> {
                                 actComp->next = nextOrg;  
                             }
                         }
-                        key++; 
                         tempNode1 = actComp; 
                     }
                     prevComp = tempNode2;
@@ -215,42 +228,42 @@ class ForwardList : public List<T> {
                 if(i + 1 != this->size()) {tempNode1 = tempNode1->next;} 
                 //std::cout<<std::endl;
             }
-            /*std::cout<< "FINAL" << "    " <<std::endl;
-            std::cout<< this->head->data << "  " << this->head->next->data << "  " << this->head->next->next->data << "  " 
-            << this->head->next->next->next->data << "  " << this->head->next->next->next->next->data << "  "  
-            << this->head->next->next->next->next->next->data << "  " <<  this->head->next->next->next->next->next->next->data << "  " <<  
-            std::endl;*/
         }
 
         bool is_sorted(){
             Node<T>* tempNode1 = this->head; 
-            if(this->head->data > this->head->next->data){
-                for(int i = 0; i < this->size(); i++){
-                    Node<T>* tempNode2 = this->head; 
-                    for(int j = 0; j < this->size(); j++){
-                        if(tempNode1->data < tempNode2->data){
-                            return false;
+            Node<T>* nextComp = this->head; 
+            Node<T>* prevComp = this->head; 
+            Node<T>* prevOrg = this->head; 
+            Node<T>* nextOrg = this->head; 
+            Node<T>* actComp = this->head; 
+            
+            for(int i = 0; i < this->size(); i++){
+                Node<T>* tempNode2 = this->head; 
+                for(int k = 0; k < i; k++){
+                    tempNode2 = tempNode2->next; 
+                }
+                for(int j = i; j < this->size(); j++){
+                    if(j == this->size()-1){ 
+                        actComp = tempNode2;
+                    } 
+                    else{ 
+                        if(tempNode2->next==nullptr){
+                            actComp = tempNode2; 
+                        } else {
+                            actComp = tempNode2->next;
                         }
-                        tempNode2 = tempNode2->next; 
                     }
-                    tempNode1 = tempNode1->next; 
-                }
-                return true; 
-            } else {
-                //std::cout<<std::endl<<this->head->data << "     " << this->head->next->data << std::endl;
-                for(int i = 0; i < this->size(); i++){
-                    Node<T>* tempNode2 = this->head; 
-                    for(int j = 0; j < this->size(); j++){
-                        //if(tempNode1->data > tempNode2->data){
-                            std::cout<<std::endl<< tempNode1->data << "  " << tempNode2->data << std::endl;
-                        //    return false;
-                        //}
-                        tempNode2 = tempNode2->next; 
+                    if(actComp->data < tempNode1->data){
+                        return false; 
                     }
-                    tempNode1 = tempNode1->next; 
+                    prevComp = tempNode2;
+                    if(j != this->size()-1)tempNode2 = tempNode2->next; 
                 }
-                return true; 
-            }
+                prevOrg = tempNode1; 
+                if(i + 1 != this->size()) {tempNode1 = tempNode1->next;} 
+            }  
+            return true;
         }
 
         void reverse(){
