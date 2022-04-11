@@ -122,7 +122,6 @@ class DoubleList : public List<T> {
             }
         }
         
-
         bool is_empty(){
             if(this->nodes == 0)return true;
             return false; 
@@ -132,8 +131,23 @@ class DoubleList : public List<T> {
             return this->nodes;
         }
         void clear(){
-            for(Node<T>* temp = head; temp != nullptr; temp = temp->next)std::cout<<temp->data<<" ";
-            std::cout<<std::endl;   
+            Node<T>* tempNode = this->head;
+            while(this->head != nullptr){
+                if(this->head->next != nullptr){
+                    tempNode = this->head->next; 
+                }
+                if(this->head->next != nullptr){
+                    this->head->killSelf(); 
+                    this->head = tempNode; 
+                    if(this->head->next == nullptr){
+                        this->head->killSelf(); 
+                        this->head = nullptr; 
+                    }
+                }
+                this->nodes--;
+            }
+            this->tail = nullptr; 
+            this->nodes--;
         }
 
         void sort(){
@@ -143,7 +157,6 @@ class DoubleList : public List<T> {
             Node<T>* prevOrg = this->head; 
             Node<T>* nextOrg = this->head; 
             Node<T>* actComp = this->head; 
-            std::cout << std::endl << "SORT" << std::endl; 
             
             for(int i = 0; i < this->size(); i++){
                 Node<T>* tempNode2 = this->head; 
@@ -151,21 +164,102 @@ class DoubleList : public List<T> {
                     tempNode2 = tempNode2->next; 
                 }
                 for(int j = i; j < this->size(); j++){
-                    std::cout << "ACTUAL " << tempNode1->data << " I: " << i << std::endl; 
-                    std::cout << "COMPARADO: " << tempNode2->data << " J : " << j << std::endl; 
-                    std::cout << "------------------------------" << std::endl; 
-                    if(tempNode1->data > tempNode2->data){
-                        std::cout << std::endl << "ES MENOOOOOR" << std::endl; 
+                    int key = 0; 
+                    actComp = tempNode2; 
+                    if(tempNode1->data > actComp->data){
+                        if(actComp->next == nullptr){
+                            nextOrg = tempNode1->next; // 30 
+                            prevComp = tempNode2->prev; // 20 
+                            if (i == 0) {
+                                //Caso que desde el ultimo punto de la lista quiere ir al primer punto de la lista 
+
+                            } else if(tempNode1->next == actComp){
+                                //Caso desde cualquier punto de la lista quiere ir al siguiente y es el final
+                                prevOrg = tempNode1->prev;
+                                prevOrg->next = tempNode2; //12 apunta 20
+                                tempNode2->prev = prevOrg; //20 apunta a 12
+                                tempNode2->next = tempNode1; //20 apunta a 30
+                                tempNode1->next = nullptr; 
+                                key++; 
+                                this->tail = tempNode1; 
+                            } else {
+                                //Caso que desde el ultimo punto de la lista quiere ir a cualquier punto de la lista
+                                prevOrg = tempNode1->prev; // 8
+                                prevOrg->next = tempNode2;  
+                                nextOrg->prev = tempNode2;     
+                                prevComp->next = tempNode1; 
+                                tempNode2->next = nextOrg;    
+                                tempNode2->prev = prevOrg;    
+                                tempNode1->prev = prevComp;
+                                tempNode1->next = nullptr;
+                                key++;
+                            }
+                            
+                        } else {
+                            nextOrg = tempNode1->next; 
+                            prevComp = actComp->prev; 
+                            nextComp = actComp->next; 
+                            if (i == 0) {
+                                //Caso desde cualquier punto de la lista quiere ir al primer punto de la lista
+                            } else if(tempNode1->next == actComp){
+                                prevOrg = tempNode1->prev; 
+                                //Caso desde cualquier punto de la lista quiere ir al siguiente 
+                                prevOrg->next = tempNode2;  //10 apunta 20
+                                nextComp->prev = tempNode1; //12 apunta a 30  
+                                tempNode2->prev = prevOrg; //20 apunta a 10
+                                tempNode1->next = nextComp; //30 apunta a 12
+                                tempNode2->next = tempNode1; //20 apunta a 30
+                                tempNode1->prev = tempNode2; //30 apunta a 20
+                                key++; 
+                            } else {
+                                //Caso desde cualquier punto de la lista quiere ir a cualquier punto de la lista
+                                prevOrg = tempNode1->prev; 
+                                prevOrg->next = actComp; //     | 5 apunta a 8 (next)
+                                nextOrg->prev = actComp; //     | 20 apunta a 8 (prev)
+                                prevComp->next = tempNode1; // | 30 apunta a 12 (next)
+                                nextComp->prev = tempNode1; // | 10 apunta a 12 (prev)
+                                tempNode1->next = nextComp; // | 12 apunta a 10 (next)
+                                tempNode1->prev = prevComp; // | 12 apunta a 30 (prev)
+                                actComp->next = nextOrg; //    | 8 apunta a 20 (next)
+                                actComp->prev = prevOrg; //     | 8 apunta a 5 (prev) 
+                                key++;
+                            }
+                        }
                     }
-                    tempNode2 = tempNode2->next; 
+                    if(key != 0){
+                        tempNode2 = tempNode1->next; 
+                        tempNode1 = actComp;
+                    }
+                    else tempNode2 = tempNode2->next; 
                 }
-                std::cout << std::endl << "CAMBIO DEL ACTUAL" << std::endl;
                 tempNode1 = tempNode1->next; 
             }
         }
 
         bool is_sorted(){
-            throw ("sin definir");
+            Node<T>* tempNode1 = this->head; 
+            Node<T>* nextComp = this->head; 
+            Node<T>* prevComp = this->head; 
+            Node<T>* prevOrg = this->head; 
+            Node<T>* nextOrg = this->head; 
+            Node<T>* actComp = this->head; 
+            
+            for(int i = 0; i < this->size(); i++){
+                Node<T>* tempNode2 = this->head; 
+                for(int k = 0; k < i; k++){
+                    tempNode2 = tempNode2->next; 
+                }
+                for(int j = i; j < this->size(); j++){
+                    int key = 0; 
+                    actComp = tempNode2; 
+                    if(tempNode1->data > actComp->data){
+                        return false; 
+                    }
+                    tempNode2 = tempNode2->next; 
+                }
+                tempNode1 = tempNode1->next; 
+            }
+            return true; 
         }
 
         void reverse(){
@@ -173,7 +267,7 @@ class DoubleList : public List<T> {
         }
 
         std::string name(){
-            return "ForwardList";
+            return "DoubleList";
         }
         
 };
