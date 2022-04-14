@@ -30,14 +30,11 @@ public:
     }
 
     void push_front(T data){
+
         Node<T>* newNode = new Node<T>(data);
         newNode->next = (this->nodes==0) ? this->head : this->head->next; //new apunta a sentinel o al siguiente caso q no este vacio NEXT
         newNode->prev = this->head; //new apunta a sentinel  PREV
-        //if(this->nodes == 0) this->head->prev = newNode; //sentinel apunta a new en caso vacio PREV
-        //else this->head->next->prev = newNode; //el siguiente a sentile apunta a nuevo
-
-        this->head->next = nullptr; //sentinel apunta a nuevo NEXT
-        std::cout << "faaf";
+        this->head->next = nullptr; //sentinel apunta a nuevo NEX
         this->nodes = this->nodes + 1;
     }
 
